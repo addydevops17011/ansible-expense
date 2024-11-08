@@ -1,0 +1,6 @@
+- name: Demo playbook
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Print a message
+      shell: echo "Hello, world!"
