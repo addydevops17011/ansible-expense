@@ -1,6 +1,7 @@
 - name: Frontend Playbook
   hosts: all
   gather_facts: yes
+  become: true
   tasks:
   - name: Install nginx for Redhat
     ansible.builtin.dnf:
