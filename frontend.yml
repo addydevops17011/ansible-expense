@@ -16,19 +16,23 @@
   - name: empty the existing directory
     ansible.builtin.file:
       path: /usr/share/nginx/html/
+      state: absent
+
+  - name: add the directory
+    ansible.builtin.file:
+      path: /usr/share/nginx/html
       state: directory
-      force: true
 
   - name: download the frontend zip file
     ansible.builtin.unarchive:
       src: https://expense-artifacts.s3.amazonaws.com/expense-frontend-v2.zip
       remote_src: true
-      dest: /usr/share/nginx/html/
+      dest: /usr/share/nginx/html
 
   - name: enable and start nginx
-    ansible.builtin.service:
+    ansible.builtin.systemd_service:
       name: nginx
-      state: started
-      enabled: yes
-      
+      state: restarted
+      enabled: true
+
 

@@ -1,0 +1,33 @@
+- name: Backend configuration
+  hosts: all
+  gather_facts: yes
+  become: true
+  tasks:
+  - name: Disable the node module
+    ansible.builtin.dnf:
+      name: nodejs
+      state: absent
+
+  - name: Enable and install the node module
+    ansible.builtin.dnf:
+      name: nodejs:20
+      state: present
+
+  - name: Create a new user named 'expense'
+    ansible.builtin.user:
+      name: expense
+      groups: wheel
+      shell: /bin/bash
+      home: /home/expense
+      state: present
+      password: $123456
+
+  - name: Download the backend zip file
+    ansible.builtin.unarchive:
+      src: https://expense-artifacts.s3.amazonaws.com/expense-backend-v2.zip
+      remote_src: true
+      dest: /home/expense/expense-backend
+
+  - name: Change to the backend directory
+    ansible.builtin.shell:
+      cmd: cd /home/expense/expense-backend
