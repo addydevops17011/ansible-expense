@@ -1,33 +1,74 @@
-- name: Backend configuration
+- name: Backend playbook
   hosts: all
   gather_facts: yes
   become: true
   tasks:
-  - name: Disable the node module
-    ansible.builtin.dnf:
-      name: nodejs
-      state: absent
+  - name: Disable the nodeJS default module
+    ansible.builtin.shell: dnf module disable nodejs -y
+
 
   - name: Enable and install the node module
+    ansible.builtin.shell: dnf module enable nodejs:20 -y
+
+  - name: Install nodejs
     ansible.builtin.dnf:
-      name: nodejs:20
+      name: nodejs
       state: present
 
   - name: Create a new user named 'expense'
     ansible.builtin.user:
       name: expense
-      groups: wheel
-      shell: /bin/bash
-      home: /home/expense
-      state: present
-      password: $123456
 
-  - name: Download the backend zip file
+  - name: copy the backend.service file
+    ansible.builtin.copy:
+      src: backend.service
+      dest: /usr/lib/systemd/system/backend.service
+
+  - name: deleting the existing application directory
+    ansible.builtin.file:
+      name: /app
+      state: absent
+
+  - name: creating the application directory
+    ansible.builtin.file:
+      name: /app
+      state: directory
+
+  - name: download the backend zip file
     ansible.builtin.unarchive:
       src: https://expense-artifacts.s3.amazonaws.com/expense-backend-v2.zip
       remote_src: true
-      dest: /home/expense/expense-backend
+      dest: /app
 
-  - name: Change to the backend directory
-    ansible.builtin.shell:
-      cmd: cd /home/expense/expense-backend
+  - name: Download the node js dependencies
+    ansible.builtin.npm:
+      path: /app
+      state: present
+
+  - name: Start and enable the backend service
+    ansible.builtin.systemd_service:
+      name: backend
+      enabled: yes
+      state: restarted
+
+  - name: Install the mysql client
+    ansible.builtin.dnf:
+      name: mysql
+      state: present
+
+  - name: Import the backend schema
+    community.mysql.mysql_db:
+      state: import
+      name: all
+      target: /app/schema/backend.sql
+      login_user: root
+      login_password: ExpenseApp@1
+      login_host: 172.31.95.134
+
+  - name: start backend service
+    ansible.builtin.systemd_service:
+      name: backend
+      state: restarted
+      enabled: true
+      daemon_reload: true
+
