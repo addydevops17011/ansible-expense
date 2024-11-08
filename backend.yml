@@ -56,6 +56,9 @@
       name: mysql
       state: present
 
+  - name: install python3-PyMySQL.noarch package
+    ansible.builtin.shell: sudo dnf install python3-PyMySQL.noarch -y
+
   - name: Import the backend schema
     community.mysql.mysql_db:
       state: import
