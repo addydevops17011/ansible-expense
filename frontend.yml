@@ -2,37 +2,9 @@
   hosts: all
   gather_facts: yes
   become: true
-  tasks:
-  - name: Install nginx for Redhat
-    ansible.builtin.dnf:
-      name: nginx
-      state: present
+  roles:
+    - frontend
 
-  - name: copy the expense.conf
-    ansible.builtin.copy:
-      src: expense.conf
-      dest: /etc/nginx/default.d/expense.conf
 
-  - name: empty the existing directory
-    ansible.builtin.file:
-      path: /usr/share/nginx/html/
-      state: absent
-
-  - name: add the directory
-    ansible.builtin.file:
-      path: /usr/share/nginx/html
-      state: directory
-
-  - name: download the frontend zip file
-    ansible.builtin.unarchive:
-      src: https://expense-artifacts.s3.amazonaws.com/expense-frontend-v2.zip
-      remote_src: true
-      dest: /usr/share/nginx/html
-
-  - name: enable and start nginx
-    ansible.builtin.systemd_service:
-      name: nginx
-      state: restarted
-      enabled: true
 
 
