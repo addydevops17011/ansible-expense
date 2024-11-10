@@ -1,0 +1,15 @@
+- name: deleting the existing application directory
+  ansible.builtin.file:
+    name: "{{ app_path }}"
+    state: absent
+
+- name: creating the application directory
+  ansible.builtin.file:
+    name: "{{ app_path }}"
+    state: directory
+
+- name: download the {{component}} zip file
+  ansible.builtin.unarchive:
+    src: https://expense-artifacts.s3.amazonaws.com/expense-{{component}}-v2.zip
+    remote_src: true
+    dest: "{{ app_path }}"
