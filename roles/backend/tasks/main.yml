@@ -20,12 +20,12 @@
     dest: /usr/lib/systemd/system/backend.service
 
 - name: deleting the existing application directory
-  ansible.builtin.file:
+  ansible.builtin.template:
     name: /app
     state: absent
 
 - name: creating the application directory
-  ansible.builtin.file:
+  ansible.builtin.template:
     name: /app
     state: directory
 
@@ -61,7 +61,7 @@
     target: /app/schema/backend.sql
     login_user: root
     login_password: ExpenseApp@1
-    login_host: mysql-dev.doubtfree.online
+    login_host: mysql-{{ env_name }}.doubtfree.online
 
 - name: start backend service
   ansible.builtin.systemd_service:
