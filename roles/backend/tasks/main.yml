@@ -1,0 +1,71 @@
+- name: Disable the nodeJS default module
+  ansible.builtin.shell: dnf module disable nodejs -y
+
+
+- name: Enable and install the node module
+  ansible.builtin.shell: dnf module enable nodejs:20 -y
+
+- name: Install nodejs
+  ansible.builtin.dnf:
+    name: nodejs
+    state: present
+
+- name: Create a new user named 'expense'
+  ansible.builtin.user:
+    name: expense
+
+- name: copy the backend.service file
+  ansible.builtin.copy:
+    src: backend.service
+    dest: /usr/lib/systemd/system/backend.service
+
+- name: deleting the existing application directory
+  ansible.builtin.file:
+    name: /app
+    state: absent
+
+- name: creating the application directory
+  ansible.builtin.file:
+    name: /app
+    state: directory
+
+- name: download the backend zip file
+  ansible.builtin.unarchive:
+    src: https://expense-artifacts.s3.amazonaws.com/expense-backend-v2.zip
+    remote_src: true
+    dest: /app
+
+- name: Download the node js dependencies
+  ansible.builtin.npm:
+    path: /app
+    state: present
+
+- name: Start and enable the backend service
+  ansible.builtin.systemd_service:
+    name: backend
+    enabled: yes
+    state: restarted
+
+- name: Install the mysql client
+  ansible.builtin.dnf:
+    name: mysql
+    state: present
+
+- name: install python3-PyMySQL.noarch package
+  ansible.builtin.shell: sudo dnf install python3-PyMySQL.noarch -y
+
+- name: Import the backend schema
+  community.mysql.mysql_db:
+    state: import
+    name: all
+    target: /app/schema/backend.sql
+    login_user: root
+    login_password: ExpenseApp@1
+    login_host: mysql-dev.doubtfree.online
+
+- name: start backend service
+  ansible.builtin.systemd_service:
+    name: backend
+    state: restarted
+    enabled: true
+    daemon_reload: true
