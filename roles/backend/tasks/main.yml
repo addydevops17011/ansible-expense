@@ -52,9 +52,13 @@
     login_password: ExpenseApp@1
     login_host: mysql-{{ env_name }}.doubtfree.online
 
-- name: start backend service
+- name: daemon reload
   ansible.builtin.systemd_service:
     name: backend
     state: restarted
+
+- name: start backend service
+  ansible.builtin.systemd_service:
+    name: backend
+    state: started
     enabled: true
-    daemon_reload: true
