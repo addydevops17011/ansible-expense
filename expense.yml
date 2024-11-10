@@ -3,6 +3,6 @@
   gather_facts: yes
   become: true
   roles:
-    - " {{ role_name }} "
+    - "{{ role_name }}"
 
 
