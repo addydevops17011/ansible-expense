@@ -42,6 +42,11 @@
 
 - name: install python3-PyMySQL.noarch package
   ansible.builtin.shell: sudo dnf install python3-PyMySQL.noarch -y
+  
+- name: Check if the target file exists
+  ansible.builtin.stat:
+    path: /app/schema/backend.sql
+  register: file_stats
 
 - name: Import the backend schema
   community.mysql.mysql_db:
@@ -51,6 +56,9 @@
     login_user: root
     login_password: ExpenseApp@1
     login_host: mysql-{{ env_name }}.doubtfree.online
+  when: file_stats.stat.exists
+  register: import_result
+  ignore_errors: true
 
 - name: daemon reload
   ansible.builtin.systemd_service:
