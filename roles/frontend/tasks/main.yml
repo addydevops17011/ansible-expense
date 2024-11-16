@@ -13,8 +13,14 @@
     name: common
     tasks_from: app-prereq.yml
 
+
+
+- name: enable and start nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    enabled: true
+
 - name: enable and start nginx
   ansible.builtin.systemd_service:
     name: nginx
     state: started
-    enabled: true
